@@ -5,7 +5,7 @@ const list = [
   'https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts',
   'https://raw.githubusercontent.com/bigdargon/hostsVN/master/filters/adservers-all.txt',
   'https://abpvn.com/android/abpvn.txt',
-  'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/pro.txt',
+  // 'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/pro.txt',
 ];
 async function run() {
   const blocklist = [];
