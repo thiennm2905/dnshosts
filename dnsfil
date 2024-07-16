@@ -1,0 +1,43 @@
+#!/bin/sh /etc/rc.common
+
+PREFIX=/root/dnsfil
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export HOME=/root
+
+START=60
+STOP=60
+
+clean() {
+	rm -f /tmp/dnsmasq.d/blocklist
+}
+
+restart_dnsmasq() {
+	/etc/init.d/dnsmasq restart &> /dev/null
+	for i in $(seq 1 60)
+	do
+		nslookup localhost 127.0.0.1 &> /dev/null && break
+		sleep 1;
+	done
+}
+
+boot() {
+  sleep 60
+  start "$@"
+}
+
+shutdown() {
+  stop
+}
+
+start() {
+  clean
+  cp "${PREFIX}/blocklist" /tmp/dnsmasq.d/blocklist
+  restart_dnsmasq
+}
+
+stop() {
+  clean
+  restart_dnsmasq
+}
+
+printf "service started"
