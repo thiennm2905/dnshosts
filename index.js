@@ -5,7 +5,8 @@ const list = [
   'https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts',
   'https://raw.githubusercontent.com/bigdargon/hostsVN/master/filters/adservers-all.txt',
   'https://abpvn.com/android/abpvn.txt',
-  'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/ultimate.txt',
+  'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/multi.txt',
+  // 'https://raw.githubusercontent.com/hagezi/dns-blocklists/main/dnsmasq/ultimate.txt',
 ];
 
 async function run() {
@@ -21,7 +22,7 @@ async function run() {
   }
   const data = [...new Set(blocklist)].sort();
   console.log(data.length);
-  fs.writeFileSync(path.join('blocklist_ultimate'), data.join('\n'));
+  fs.writeFileSync(path.join('blocklist'), data.join('\n'));
 }
 
 run();
