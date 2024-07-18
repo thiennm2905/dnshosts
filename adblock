@@ -1,0 +1,86 @@
+#!/bin/sh /etc/rc.common
+
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+export HOME=/root
+
+START=99
+STOP=99
+
+EXTRA_COMMANDS="download"
+
+PREFIX=/root/adblock
+URL="https://raw.githubusercontent.com/thiennm2905/dnshosts/main/blocklist"
+
+log_msg() {
+  local msg="${1}"
+  [[ -t 1 ]] && printf "${msg}\n"
+  logger -t adblock "${msg}"
+}
+
+init() {
+  mkdir -p "${PREFIX}"
+}
+
+clean() {
+  log_msg "remove blocklist file"
+  rm -f /tmp/dnsmasq.d/blocklist
+}
+
+restart_dnsmasq() {
+  log_msg "restart dnsmasq"
+  /etc/init.d/dnsmasq restart &> /dev/null
+  for i in $(seq 1 60)
+  do
+    log_msg "lookup localhost"
+    nslookup localhost 127.0.0.1 &> /dev/null && break
+    sleep 1;
+  done
+}
+
+check_dnsmasq() {
+  log_msg "check dnsmasq"
+  for domain in google.com amazon.com microsoft.com
+  do
+    if ! nslookup "${domain}" 127.0.0.1 &> /dev/null
+    then
+      log_msg "lookup of '${domain}' failed with blocklist."
+    elif nslookup "${domain}" 127.0.0.1 | grep -A1 ^Name | grep -q '^Address: *0\.0\.0\.0$'
+    then
+      log_msg "lookup of '${domain}' resulted in 0.0.0.0 with blocklist."
+    else
+      nslookup "${domain}"
+    fi
+  done
+}
+
+download() {
+  log_msg "download blocklist file from url: ${URL}"
+  uclient-fetch -O - "${URL}" > "${PREFIX}/blocklist"
+}
+
+boot() {
+  log_msg "boot up adblock service"
+  sleep 10
+  start "$@"
+}
+
+shutdown() {
+  log_msg "shutdown adblock service"
+  stop
+}
+
+start() {
+  log_msg "start adblock service"
+  clean
+  cp "${PREFIX}/blocklist" /tmp/dnsmasq.d/blocklist
+  restart_dnsmasq
+  check_dnsmasq
+}
+
+stop() {
+  log_msg "stop adblock service"
+  clean
+  restart_dnsmasq
+}
+
+init
